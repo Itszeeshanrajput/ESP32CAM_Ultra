@@ -1,0 +1,23 @@
+# Arduino / build artifacts
+build/
+.pio/
+*.elf
+*.bin
+*.hex
+merged/
+
+# Python
+__pycache__/
+*.pyc
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local secrets / runtime state (never commit these)
+*.mp3
+*.wav
+nvs.bin

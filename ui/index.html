@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c1118"><link rel="manifest" href="/manifest.json"><link rel="icon" href="/icon.svg" type="image/svg+xml">
+<title>CCTV</title>
+<style>
+:root{--bg:#0c1118;--p1:#131b26;--p2:#1a2432;--ln:#263346;--tx:#e8edf3;--dim:#8593a8;--amber:#f2a93b;--teal:#46c2b5;--red:#ef5b5b;--blue:#6aa9ff;--r:10px;
+--f:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",sans-serif}
+@media(prefers-color-scheme:light){:root{--bg:#eef1f5;--p1:#fff;--p2:#f2f5f9;--ln:#d5dce6;--tx:#17202b;--dim:#5c6b80;--amber:#c47a06;--teal:#0f8f80;--red:#d23b3b;--blue:#2563c9}}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font:15px/1.45 var(--f);display:flex;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:var(--p2);border:1px solid var(--ln);border-radius:8px;padding:8px 13px;font-weight:600;font-size:.86rem}
+button:hover{border-color:var(--amber)}button:disabled{opacity:.5;cursor:default}
+button.pri{background:var(--amber);color:#1b1200;border-color:var(--amber)}button.dng{color:var(--red)}button.dng:hover{background:var(--red);color:#fff;border-color:var(--red)}
+button.sm{padding:4px 9px;font-size:.78rem}
+input[type=text],input[type=password],input[type=number],select{width:100%;background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:9px 10px}
+input[type=range]{width:100%;accent-color:var(--amber)}
+nav{display:flex;flex-direction:column;gap:4px;width:84px;flex:none;background:var(--p1);border-right:1px solid var(--ln);padding:12px 8px}
+nav button{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;color:var(--dim);font-size:.72rem;padding:10px 2px;border-radius:9px}
+nav button.on{background:var(--p2);color:var(--amber)}nav svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+main{flex:1;min-width:0;overflow-y:auto;padding:18px 20px 40px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.top h1{font-size:1.15rem;font-weight:700;flex:1;min-width:120px}
+.chip{font-size:.74rem;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--p2);border:1px solid var(--ln);color:var(--dim);white-space:nowrap}
+.chip.ok{color:var(--teal);border-color:var(--teal)}.chip.warn{color:var(--amber);border-color:var(--amber)}.chip.bad{color:var(--red);border-color:var(--red)}
+.chip.rec{background:var(--red);border-color:var(--red);color:#fff;animation:blink 1.4s infinite}@keyframes blink{50%{opacity:.5}}
+.banner{display:none;background:rgba(239,91,91,.14);border:1px solid var(--red);color:var(--red);padding:8px 12px;border-radius:8px;margin-bottom:12px;font-size:.85rem}
+.banner.show{display:block}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:1fr}@media(min-width:1050px){.g2{grid-template-columns:minmax(0,1.8fr) minmax(300px,1fr)}}
+.card{background:var(--p1);border:1px solid var(--ln);border-radius:var(--r);padding:14px}
+.card h2{font-size:.95rem;margin-bottom:10px}
+.vid{position:relative;background:#000;border-radius:8px;overflow:hidden;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}
+.vid img{width:100%;height:100%;object-fit:contain}
+.vid .hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;gap:6px;pointer-events:none}
+.vid .hud .chip{background:rgba(12,17,24,.78);backdrop-filter:blur(6px)}
+.vid .osd{position:absolute;left:8px;bottom:8px;font:600 .74rem ui-monospace,Menlo,monospace;background:rgba(0,0,0,.55);color:#fff;padding:2px 7px;border-radius:4px}
+.meter{position:absolute;right:8px;bottom:8px;width:90px;height:6px;background:rgba(255,255,255,.2);border-radius:9px;overflow:hidden}.meter i{display:block;height:100%;background:var(--amber);width:0;transition:width .25s}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.fld{margin-bottom:13px}.fld>label{display:flex;justify-content:space-between;font-size:.78rem;color:var(--dim);font-weight:600;margin-bottom:5px}.fld>label b{color:var(--tx)}
+.hint{font-size:.74rem;color:var(--dim);margin-top:4px}
+.sw{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--ln)}.sw:last-child{border:0}
+.sw .t{font-weight:600;font-size:.88rem}.sw .s{font-size:.74rem;color:var(--dim)}
+.tog{appearance:none;position:relative;width:44px;height:25px;flex:none;background:var(--p2);border:1px solid var(--ln);border-radius:99px;cursor:pointer;transition:.15s}
+.tog::after{content:"";position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:var(--dim);transition:.15s}
+.tog:checked{background:var(--amber);border-color:var(--amber)}.tog:checked::after{left:22px;background:#1b1200}
+.tabs{display:flex;gap:4px;background:var(--p2);padding:4px;border-radius:9px;overflow-x:auto;margin-bottom:14px}
+.tabs button{flex:1;background:none;border:0;color:var(--dim);white-space:nowrap;padding:7px 10px}.tabs button.on{background:var(--p1);color:var(--tx)}
+.adv{display:none!important}.showadv .adv{display:block!important}.showadv .sw.adv,.showadv .row.adv{display:flex!important}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.st{background:var(--p2);border:1px solid var(--ln);border-radius:8px;padding:8px 10px}.st .k{font-size:.7rem;color:var(--dim)}.st .v{font-weight:700;font-variant-numeric:tabular-nums;word-break:break-word}
+.bar{display:flex;height:9px;background:var(--p2);border-radius:9px;overflow:hidden;margin:8px 0 6px}.bar i{display:block;height:100%}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.74rem;color:var(--dim)}.legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--c);margin-right:5px}
+.days{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin:10px 0}.days button{flex:none}.days button.on{background:var(--amber);color:#1b1200;border-color:var(--amber)}
+.list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.item{display:flex;align-items:center;gap:10px;background:var(--p2);border:1px solid var(--ln);border-radius:8px;padding:8px 10px}
+.item .nm{flex:1;min-width:0;font-weight:600;font-size:.86rem;word-break:break-all}.item .mt{font-size:.72rem;color:var(--dim)}
+.tag{font-size:.66rem;font-weight:700;border-radius:5px;padding:1px 6px;border:1px solid currentColor;margin-right:6px}
+.t-rec{color:var(--blue)}.t-mot{color:var(--amber)}.t-tl{color:#c39bff}.t-img{color:var(--teal)}
+.evs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.ev{background:var(--p2);border:1px solid var(--ln);border-radius:var(--r);overflow:hidden}.ev img{width:100%;aspect-ratio:4/3;object-fit:cover;background:#000;display:block}.ev div{padding:8px 10px;font-size:.8rem}
+.modal{position:fixed;inset:0;background:rgba(3,6,10,.86);display:none;align-items:center;justify-content:center;padding:14px;z-index:50}.modal.on{display:flex}
+.box{background:var(--p1);border:1px solid var(--ln);border-radius:12px;width:100%;max-width:800px;padding:14px;max-height:100%;overflow:auto}
+.zone{position:relative}.zone img{width:100%;display:block;border-radius:6px;aspect-ratio:4/3;object-fit:cover;background:#000}
+.zg{position:absolute;inset:0;display:grid;grid-template-columns:repeat(16,1fr);grid-template-rows:repeat(12,1fr);touch-action:none}
+.zg i{border:1px solid rgba(255,255,255,.18);background:rgba(239,91,91,.42)}.zg i.on{background:rgba(70,194,181,.22)}
+pre.log{background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:10px;font:.7rem/1.6 ui-monospace,Menlo,monospace;max-height:340px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.lE{color:var(--red)}.lW{color:var(--amber)}
+#toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 16px;border-radius:99px;font-weight:600;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:99}#toast.on{opacity:1}
+#gate{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:90;padding:20px}#gate.on{display:flex}
+#gate form{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+@media(max-width:760px){body{flex-direction:column-reverse}nav{flex-direction:row;width:100%;border-right:0;border-top:1px solid var(--ln);padding:6px 6px calc(6px + env(safe-area-inset-bottom));justify-content:space-around}nav button{flex:1;padding:6px 0}main{padding:12px 12px 20px}#toast{bottom:90px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+
+<div id="gate"><form id="gform"></form></div>
+
+<nav id="nav" aria-label="Sections"></nav>
+<main id="main">
+  <div class="top"><h1 id="ttl">CCTV</h1><span class="chip" id="c-net">connecting</span><span class="chip" id="c-sd">SD</span><span class="chip rec" id="c-rec" style="display:none">REC</span><button class="sm" id="b-out" style="display:none">Sign out</button></div>
+  <div class="banner" id="lost">Connection to the camera lost. Retrying...</div>
+  <section id="v-live"></section><section id="v-files" hidden></section><section id="v-events" hidden></section>
+  <section id="v-set" hidden></section><section id="v-net" hidden></section><section id="v-sys" hidden></section>
+</main>
+
+<div class="modal" id="m-play"><div class="box">
+  <div class="row" style="margin:0 0 10px"><b id="pl-t" style="flex:1;word-break:break-all"></b><button class="sm" id="pl-x">Close</button></div>
+  <div class="vid"><img id="pl-img" alt="clip frame"></div>
+  <input type="range" id="pl-sk" min="0" max="0" value="0" style="margin-top:10px" aria-label="Seek">
+  <div class="row"><button id="pl-b">-10s</button><button id="pl-p" class="pri">Play</button><button id="pl-f">Next frame</button><button id="pl-s">1x</button><button id="pl-fs">Fullscreen</button><a id="pl-d"><button>Download</button></a><span class="hint mono" id="pl-i" style="margin:0"></span></div>
+  <div class="hint" id="pl-n"></div>
+</div></div>
+<div class="modal" id="m-zone"><div class="box">
+  <div class="row" style="margin:0 0 10px"><b style="flex:1">Motion zones</b><button class="sm" id="z-x">Close</button></div>
+  <div class="zone"><img id="z-img" alt="camera view"><div class="zg" id="z-g"></div></div>
+  <div class="hint">Tap or drag cells. Green cells are watched; red cells are ignored (trees, roads, screens).</div>
+  <div class="row"><button id="z-all">Watch all</button><button id="z-none">Ignore all</button><button class="pri" id="z-save">Save zones</button></div>
+</div></div>
+<div id="toast" role="status"></div>
+
+<script>
+const $=s=>document.querySelector(s),MEDIA=location.protocol+'//'+location.hostname+':81';
+let S={csrf:'',role:0,must:false},C={},CFGX={sizes:[],set:{}},ST={},view='live',statusTimer=0,lostCount=0;
+function h(t,a={},...c){const e=document.createElement(t);for(const k in a){if(k==='class')e.className=a[k];else if(k.startsWith('on'))e.addEventListener(k.slice(2),a[k]);else if(k==='text')e.textContent=a[k];else if(a[k]!==false&&a[k]!==null)e.setAttribute(k,a[k])}c.flat().forEach(x=>e.append(x&&x.nodeType?x:document.createTextNode(x==null?'':x)));return e}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2200)}
+async function api(p,o={}){o={credentials:'same-origin',...o};
+  if(o.body&&o.body.constructor===Object){o.method='POST';o.body=new URLSearchParams(o.body)}
+  if(o.method==='POST')o.headers={...(o.headers||{}),'X-CSRF':S.csrf};
+  const r=await fetch(p,o);let j=null;try{j=await r.json()}catch(e){}
+  if(r.status===401){gate('login');throw 0}
+  if(r.status===403&&j&&j.error==='pwchange'){gate('pw');throw 0}
+  if(!r.ok)throw j||{error:'http'+r.status};return j}
+const post=(p,b={})=>api(p,{method:'POST',body:new URLSearchParams(b)});
+const kb=k=>k>=1024?(k/1024).toFixed(1)+' MB':k+' KB';
+const fmtUp=s=>{const d=Math.floor(s/86400),hh=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return(d?d+'d ':'')+hh+'h '+m+'m'};
+
+/* ---------- navigation ---------- */
+const ICON={live:'<path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>',files:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',events:'<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',set:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',net:'<path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>',sys:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'};
+const NAV=[['live','Live'],['files','Files'],['events','Events'],['set','Settings'],['net','Network'],['sys','System']];
+function buildNav(){const n=$('#nav');n.innerHTML='';NAV.forEach(([id,l])=>{if(S.role<2&&['set','net','sys'].includes(id))return;
+  const b=h('button',{'data-v':id,onclick:()=>go(id)});b.innerHTML='<svg viewBox="0 0 24 24">'+ICON[id]+'</svg>'+l;n.append(b)})}
+function go(v){view=v;document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!=='v-'+v);
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('#ttl').textContent=(NAV.find(x=>x[0]===v)||[0,'CCTV'])[1]+(C.camname?' - '+C.camname:'');
+  if(v==='live')liveOn();else liveOff();({files:loadFiles,events:loadEvents,set:renderSettings,net:renderNet,sys:renderSys})[v]&&({files:loadFiles,events:loadEvents,set:renderSettings,net:renderNet,sys:renderSys})[v]()}
+
+/* ---------- login / forced password change ---------- */
+function gate(mode){const g=$('#gate'),f=$('#gform');g.classList.add('on');f.innerHTML='';liveOff();
+  if(mode==='login'){f.append(h('h2',{text:'Sign in'}),h('input',{type:'text',id:'g-u',placeholder:'Username',autocomplete:'username'}),h('input',{type:'password',id:'g-p',placeholder:'Password',autocomplete:'current-password'}),h('button',{class:'pri',type:'submit',text:'Sign in'}),h('div',{class:'hint',id:'g-e'}));
+    f.onsubmit=async e=>{e.preventDefault();try{const j=await post('/api/login',{user:$('#g-u').value,pass:$('#g-p').value});S.csrf=j.csrf;S.role=j.role;S.must=j.must;g.classList.remove('on');j.must?gate('pw'):boot()}catch(x){$('#g-e').textContent=x&&x.error==='locked'?'Too many attempts. Wait 5 minutes.':'Wrong username or password.'}}}
+  else{f.append(h('h2',{text:'Choose a new admin password'}),h('div',{class:'hint',text:'The default password must be changed before you can use the camera. Minimum 6 characters.'}),h('input',{type:'password',id:'n-c',placeholder:'Current password',autocomplete:'current-password'}),h('input',{type:'text',id:'n-u',placeholder:'Admin username',value:'admin'}),h('input',{type:'password',id:'n-p',placeholder:'New password',autocomplete:'new-password'}),h('button',{class:'pri',type:'submit',text:'Save password'}),h('div',{class:'hint',id:'g-e'}));
+    f.onsubmit=async e=>{e.preventDefault();try{await post('/api/account',{role:'admin',cur:$('#n-c').value,user:$('#n-u').value,pass:$('#n-p').value});toast('Password changed. Sign in again.');S.role=0;gate('login')}catch(x){$('#g-e').textContent=x&&x.error==='wrongcur'?'Current password is wrong.':'Use at least 6 characters and not "admin".'}}}}
+
+/* ---------- LIVE ---------- */
+function liveOn(){const i=$('#live');if(i&&!i.src.includes(':81'))i.src=MEDIA+'/stream?'+Date.now();startPoll()}
+function liveOff(){const i=$('#live');if(i)i.removeAttribute('src')}
+document.addEventListener('visibilitychange',()=>{document.hidden?liveOff():(view==='live'&&liveOn())});
+function buildLive(){const el=$('#v-live');el.innerHTML='';
+  const vid=h('div',{class:'vid'},h('img',{id:'live',alt:'live view',onerror:()=>setTimeout(()=>view==='live'&&!document.hidden&&liveOn(),3000)}),h('div',{class:'hud'},h('div',{},h('span',{class:'chip ok',id:'l-fps',text:'idle'})),h('div',{},h('span',{class:'chip',id:'l-mode'}))),h('div',{class:'osd',id:'l-osd'}),h('div',{class:'meter',title:'Motion level'},h('i',{id:'l-m'})));
+  const ctl=h('div',{class:'card'},h('h2',{text:'Controls'}));
+  if(S.role>=2){
+    ctl.append(swRow('Armed','Motion alerts and motion recording',()=>!!C.armed,v=>save('armed',v?1:0)));
+    ctl.append(h('div',{class:'fld'},h('label',{},'Flash LED ',h('b',{id:'fl-v',text:'0%'})),h('input',{type:'range',min:0,max:200,value:0,id:'flash',oninput:e=>{$('#fl-v').textContent=Math.round(e.target.value/2)+'%'},onchange:e=>post('/api/flash',{val:e.target.value})}),h('div',{class:'hint',text:'Turns itself off after 10 minutes.'})));
+    ctl.append(h('div',{class:'fld'},h('label',{text:'Camera profile'}),h('div',{class:'row',style:'margin:0'},['day','night','indoor'].map(n=>h('button',{class:'sm',text:n[0].toUpperCase()+n.slice(1),onclick:()=>post('/api/preset',{name:n}).then(()=>toast('Profile applied'))})))));
+    ctl.append(h('div',{class:'row'},h('button',{class:'pri',text:'Save snapshot',onclick:()=>post('/api/snapshot').then(j=>toast('Saved '+j.path)).catch(()=>toast('Snapshot failed'))}),h('a',{href:'/capture?dl=1',download:'snapshot.jpg'},h('button',{text:'Download now'})),h('button',{text:'Fullscreen',onclick:()=>$('#live').requestFullscreen&&$('#live').requestFullscreen()})));
+  }else ctl.append(h('div',{class:'row'},h('a',{href:'/capture?dl=1'},h('button',{class:'pri',text:'Download snapshot'})),h('button',{text:'Fullscreen',onclick:()=>$('#live').requestFullscreen&&$('#live').requestFullscreen()})));
+  ctl.append(h('div',{class:'stats',style:'margin-top:12px'},stat('Motion','s-m'),stat('Day/night','s-n'),stat('Viewers','s-v'),stat('Free heap','s-h')));
+  el.append(h('div',{class:'grid g2'},h('div',{class:'card'},vid),ctl))}
+const stat=(k,id)=>h('div',{class:'st'},h('div',{class:'k',text:k}),h('div',{class:'v',id,text:'-'}));
+function swRow(t,s,get,set){const i=h('input',{type:'checkbox',class:'tog',onchange:e=>set(e.target.checked)});i.checked=get();return h('div',{class:'sw'},h('div',{},h('div',{class:'t',text:t}),s?h('div',{class:'s',text:s}):''),i)}
+
+/* ---------- status polling ---------- */
+function startPoll(){clearInterval(statusTimer);poll();statusTimer=setInterval(()=>{if(!document.hidden)poll()},3000)}
+async function poll(){try{const d=await api('/api/status');ST=d;lostCount=0;$('#lost').classList.remove('show');
+  C.armed=d.armed;$('#c-net').textContent=d.ip||d.apSsid||'AP';$('#c-net').className='chip '+(d.ip?'ok':'warn');
+  $('#c-sd').textContent=d.sd?'SD '+(d.sdFreeMB>1024?(d.sdFreeMB/1024).toFixed(1)+' GB':d.sdFreeMB+' MB')+' free':'No SD';$('#c-sd').className='chip '+(d.sd?(d.sdFreeMB<600?'warn':'ok'):'bad');
+  $('#c-rec').style.display=d.rec?'':'none';
+  const s=id=>$('#'+id),t=(id,v)=>{const e=s(id);if(e)e.textContent=v};
+  t('l-fps',d.viewers?d.fps.toFixed(1)+' fps':'idle');t('l-mode',d.armed?(d.motion?'MOTION':'Armed'):'Disarmed');t('l-osd',(C.camname||'')+'  '+d.time);
+  const m=s('l-m');if(m)m.style.width=d.mscore+'%';t('s-m',d.motion?'Active ('+d.mscore+'%)':'Quiet');t('s-n',d.night?'Night':'Day');t('s-v',d.viewers);t('s-h',Math.round(d.heap/1024)+' KB');
+  const l=s('l-mode');if(l)l.className='chip '+(d.motion?'bad':d.armed?'ok':'');
+  if(!d.timeOk&&!poll.tw){poll.tw=1;toast('Clock not set. Use System > Sync clock.')}
+}catch(e){if(e!==0&&++lostCount>=2)$('#lost').classList.add('show')}}
+
+/* ---------- FILES + PLAYER ---------- */
+let F={days:[],day:'',files:[],type:'all',sort:'new',q:'',sel:new Set()};
+const TYPES=[['all','All',''],['rec','24/7','rec_'],['mot','Motion','mot_'],['tl','Time-lapse','tl_'],['img','Images','']];
+const kind=n=>n.startsWith('rec_')?'rec':n.startsWith('mot_')?'mot':n.startsWith('tl_')?'tl':'img';
+async function loadFiles(){const el=$('#v-files');el.innerHTML='';el.append(h('div',{class:'card',id:'stor'}),h('div',{class:'days',id:'days'}),h('div',{id:'ftools'}),h('div',{class:'list',id:'flist'}));
+  api('/api/storage').then(s=>{const T=s.totalMB||1,seg=(v,c)=>h('i',{style:`width:${v/T*100}%;background:${c}`});
+    $('#stor').append(h('h2',{text:'Storage'}),h('div',{class:'hint',text:`${s.usedMB} of ${s.totalMB} MB used, ${s.freeMB} MB free, ${s.files} files over ${s.days} days`}),h('div',{class:'bar'},seg(s.recMB,'var(--blue)'),seg(s.motMB,'var(--amber)'),seg(s.tlMB,'#c39bff'),seg(s.imgMB,'var(--teal)')),
+      h('div',{class:'legend'},h('span',{style:'--c:var(--blue)',text:'24/7 '+s.recMB+' MB'}),h('span',{style:'--c:var(--amber)',text:'Motion '+s.motMB+' MB'}),h('span',{style:'--c:#c39bff',text:'Time-lapse '+s.tlMB+' MB'}),h('span',{style:'--c:var(--teal)',text:'Images '+s.imgMB+' MB'})))}).catch(()=>{});
+  try{const d=await api('/api/days');F.days=d.days;if(!F.days.includes(F.day))F.day=F.days[0]||'';drawDays();if(F.day)await loadDay();else $('#flist').append(h('div',{class:'hint',text:'No recordings yet. Turn on recording in Settings, or save a snapshot from Live.'}))}catch(e){e!==0&&$('#flist').append(h('div',{class:'hint',text:'Could not read the SD card.'}))}}
+const fmtDay=d=>d.length===8?d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6):d;
+function drawDays(){const e=$('#days');e.innerHTML='';F.days.forEach(d=>e.append(h('button',{class:d===F.day?'on':'',text:fmtDay(d),onclick:()=>{F.day=d;F.sel.clear();drawDays();loadDay()}})))}
+async function loadDay(){$('#flist').innerHTML='<div class="hint">Loading...</div>';try{const j=await api('/api/list?day='+F.day);F.files=j.files;drawTools();drawList()}catch(e){if(e===0)return;loadDay.r=(loadDay.r||0)+1;if(loadDay.r<4)setTimeout(loadDay,1200);else{loadDay.r=0;$('#flist').innerHTML='<div class="hint">SD card busy. Pull down to retry or open Files again.</div>'}}}
+function drawTools(){const t=$('#ftools');t.innerHTML='';
+  t.append(h('div',{class:'tabs'},TYPES.map(([k,l])=>h('button',{class:F.type===k?'on':'',text:l,onclick:()=>{F.type=k;drawTools();drawList()}}))),
+   h('div',{class:'row',style:'margin:0 0 6px'},h('input',{type:'text',placeholder:'Search by time, e.g. 1435',style:'flex:1;min-width:140px',value:F.q,oninput:e=>{F.q=e.target.value;drawList()}}),
+    h('select',{style:'width:auto',onchange:e=>{F.sort=e.target.value;drawList()}},[['new','Newest'],['old','Oldest'],['big','Largest']].map(([v,l])=>h('option',{value:v,text:l,selected:F.sort===v}))),
+    S.role>=2?[h('button',{class:'sm',text:'Select all',onclick:()=>{visible().forEach(f=>F.sel.add(f.n));drawList()}}),h('button',{class:'sm dng',id:'b-dsel',text:'Delete selected',onclick:delSel}),h('button',{class:'sm dng',text:'Delete day',onclick:delDay})]:''))}
+const visible=()=>{let l=F.files.filter(f=>F.type==='all'||kind(f.n)===F.type);if(F.q)l=l.filter(f=>f.n.includes(F.q));
+  return l.sort((a,b)=>F.sort==='big'?b.k-a.k:F.sort==='old'?a.n.localeCompare(b.n):b.n.localeCompare(a.n))};
+const tm=n=>{const m=n.match(/_(\d{2})(\d{2})(\d{2})/);return m?m[1]+':'+m[2]+':'+m[3]:n};
+function drawList(){const e=$('#flist');e.innerHTML='';const l=visible();if(!l.length){e.append(h('div',{class:'hint',text:'Nothing in this category for the selected day.'}));return}
+  l.forEach(f=>{const k=kind(f.n),path='/'+F.day+'/'+f.n,lab={rec:'24/7',mot:'Motion',tl:'Time-lapse',img:'Image'}[k],isAvi=f.n.toLowerCase().endsWith('.avi');
+    const cb=h('input',{type:'checkbox',onchange:ev=>{ev.target.checked?F.sel.add(f.n):F.sel.delete(f.n)}});cb.checked=F.sel.has(f.n);if(S.role<2||f.o)cb.disabled=true;
+    e.append(h('div',{class:'item'},cb,h('div',{class:'nm'},h('span',{class:'tag t-'+k,text:lab}),tm(f.n),h('div',{class:'mt',text:kb(f.k)+(f.o?' - recording now':'')+' - '+f.n})),
+      h('button',{class:'sm pri',text:isAvi?'Play':'View',onclick:()=>isAvi?playClip(path):viewImg(path)}),h('a',{href:MEDIA+'/dl?file='+encodeURIComponent(path)},h('button',{class:'sm',text:'Save'})),
+      S.role>=2&&!f.o?h('button',{class:'sm dng',text:'Delete',onclick:()=>delFiles([path])}):''))})}
+async function delFiles(paths){if(!confirm('Delete '+paths.length+' file(s)? This cannot be undone.'))return;try{const j=await post('/api/delete',{files:paths.join('\n')});toast('Deleted '+j.deleted);F.sel.clear();loadFiles()}catch(e){toast('Delete failed')}}
+const delSel=()=>F.sel.size?delFiles([...F.sel].map(n=>'/'+F.day+'/'+n)):toast('Select files first');
+async function delDay(){if(!confirm('Delete every file from '+fmtDay(F.day)+'?'))return;const j=await post('/api/delete',{mode:'day',day:F.day,confirm:'DELETE'});toast('Deleted '+j.deleted);loadFiles()}
+let P={file:'',n:0,frames:0,fps:8,playing:false,speed:1,timer:0};
+const SPEEDS=[1,2,4,8];
+function viewImg(path){P.frames=0;$('#pl-t').textContent=path;$('#pl-img').src=MEDIA+'/thumb?file='+encodeURIComponent(path);$('#pl-sk').style.display='none';$('#pl-n').textContent='';$('#pl-d').href=MEDIA+'/dl?file='+encodeURIComponent(path);['pl-b','pl-p','pl-f','pl-s'].forEach(i=>$('#'+i).style.display='none');$('#m-play').classList.add('on')}
+async function playClip(path){['pl-b','pl-p','pl-f','pl-s'].forEach(i=>$('#'+i).style.display='');$('#pl-sk').style.display='';
+  P={...P,file:path,n:0,speed:1,playing:false};$('#pl-t').textContent=path;$('#pl-s').textContent='1x';$('#pl-d').href=MEDIA+'/dl?file='+encodeURIComponent(path);$('#pl-n').innerHTML='';$('#pl-img').removeAttribute('src');$('#m-play').classList.add('on');
+  try{const i=await api('/api/clipinfo?file='+encodeURIComponent(path));
+    if(i.open){$('#pl-n').textContent='This file is still being recorded. It becomes playable when it closes (next file boundary).';return}
+    if(!i.indexed){$('#pl-n').append('This clip was not closed cleanly (power loss?). ',S.role>=2?h('button',{class:'sm pri',text:'Repair now',onclick:async()=>{try{const r=await post('/api/repair',{file:path});toast('Recovered '+r.frames+' frames');playClip(path)}catch(e){toast('Repair failed')}}}):'');return}
+    P.frames=i.frames;P.fps=i.fps||8;$('#pl-sk').max=Math.max(0,i.frames-1);showFrame(0)}catch(e){$('#pl-n').textContent='Could not open this clip.'}}
+function showFrame(n){P.n=Math.max(0,Math.min(P.frames-1,n));$('#pl-img').src=MEDIA+'/frame?file='+encodeURIComponent(P.file)+'&n='+P.n;$('#pl-sk').value=P.n;const s=P.n/P.fps,t=P.frames/P.fps;$('#pl-i').textContent=Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')+' / '+Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0')}
+function tick(){if(!P.playing)return;const t0=performance.now(),im=$('#pl-img');im.onerror=()=>setPlay(false);im.onload=()=>{if(!P.playing)return;if(P.n>=P.frames-1){setPlay(false);return}const el=performance.now()-t0;P.timer=setTimeout(tick,Math.max(0,1000/P.fps-el));};P.n=Math.min(P.frames-1,P.n+P.speed);showFrame(P.n)}
+function setPlay(on){P.playing=on;$('#pl-p').textContent=on?'Pause':'Play';clearTimeout(P.timer);if(on){if(P.n>=P.frames-1)P.n=0;tick()}else $('#pl-img').onload=null}
+$('#pl-p').onclick=()=>P.frames&&setPlay(!P.playing);$('#pl-f').onclick=()=>{setPlay(false);showFrame(P.n+1)};$('#pl-b').onclick=()=>showFrame(P.n-Math.round(10*P.fps));
+$('#pl-s').onclick=()=>{P.speed=SPEEDS[(SPEEDS.indexOf(P.speed)+1)%SPEEDS.length];$('#pl-s').textContent=P.speed+'x'};$('#pl-sk').oninput=e=>{setPlay(false);showFrame(+e.target.value)};
+$('#pl-fs').onclick=()=>$('#pl-img').requestFullscreen&&$('#pl-img').requestFullscreen();
+$('#pl-x').onclick=()=>{setPlay(false);$('#pl-img').removeAttribute('src');$('#m-play').classList.remove('on')};
+
+/* ---------- EVENTS ---------- */
+async function loadEvents(){const el=$('#v-events');el.innerHTML='<div class="hint">Loading...</div>';try{const j=await api('/api/events');el.innerHTML='';
+  if(!j.events.length){el.append(h('div',{class:'hint',text:'No motion events yet. Events appear here with a photo and a link to the clip.'}));return}
+  const g=h('div',{class:'evs'});j.events.forEach(e=>{const d=new Date(e.ts*1000);
+    g.append(h('div',{class:'ev'},e.thumb?h('img',{loading:'lazy',alt:'event',src:MEDIA+'/thumb?file='+encodeURIComponent(e.thumb)}):h('div',{text:'no photo'}),h('div',{},h('b',{text:d.toLocaleString()}),h('div',{class:'hint',text:(e.pir?'PIR sensor':'Motion '+e.score+'%')}),h('div',{class:'row',style:'margin-top:6px'},e.clip?h('button',{class:'sm pri',text:'Open clip',onclick:()=>playClip(e.clip)}):'',e.thumb?h('button',{class:'sm',text:'Photo',onclick:()=>viewImg(e.thumb)}):''))))});el.append(g)}catch(e){el.innerHTML='<div class="hint">Could not load events.</div>'}}
+
+/* ---------- SETTINGS (schema driven) ---------- */
+const O=(a,f)=>a.map(x=>[x,f?f(x):x]);
+const SCHEMA=[
+ {id:'rec',t:'Recording',f:[
+  {k:'recmode',t:'sel',l:'Recording mode',o:[[1,'Continuous (24/7)'],[2,'Motion only'],[0,'Off - live view only']],h:'Motion only keeps a few seconds before and after each event and saves a lot of space.'},
+  {k:'chunk',t:'sel',l:'File length',o:O([5,10,15,30,60],x=>x+' minutes'),h:'Files start on the clock (for example 14:00, 14:15). 15 minutes is a good balance.'},
+  {k:'recfps',t:'sel',l:'Recording frame rate',o:O([4,6,8,10,12,15],x=>x+' fps'),h:'Higher looks smoother but uses more storage.'},
+  {k:'retdays',t:'sel',l:'Keep recordings for',o:[[0,'Until the card is full'],[1,'1 day'],[3,'3 days'],[7,'7 days'],[14,'14 days'],[30,'30 days']],h:'Older days are deleted first. When space runs low the oldest files go, even before this limit.'},
+  {k:'freepct',t:'range',min:1,max:40,l:'Always keep free space',u:'%',adv:1},
+  {k:'tl',t:'sw',l:'Time-lapse',s:'Saves one short video per session, one frame every interval'},
+  {k:'tlint',t:'sel',l:'Time-lapse interval',o:O([2,5,10,30,60,120],x=>x+' seconds'),adv:1}]},
+ {id:'mot',t:'Motion',f:[
+  {k:'motion',t:'sw',l:'Motion detection',s:'Watches the picture for changes'},
+  {k:'mthr',t:'range',min:1,max:50,l:'Sensitivity threshold',u:'% of picture',h:'Lower = more sensitive. Start at 4 and raise it if you get false alerts.'},
+  {k:'mframes',t:'range',min:1,max:6,l:'Confirm over frames',u:'',adv:1,h:'Motion must appear in this many checks in a row.'},
+  {k:'preroll',t:'range',min:0,max:6,l:'Pre-roll',u:' s',h:'Seconds recorded before the trigger (motion-only mode).'},
+  {k:'postroll',t:'range',min:3,max:120,l:'Post-roll',u:' s',h:'Keeps recording this long after movement stops.'},
+  {k:'maxclip',t:'range',min:10,max:600,l:'Longest single clip',u:' s',adv:1},
+  {k:'pir',t:'sw',l:'PIR sensor on GPIO 13',s:'Optional hardware motion sensor',adv:1},
+  {t:'zone'},
+  {k:'nflash',t:'sw',l:'Flash LED on night motion',s:'Lights up during a night event'},
+  {k:'nduty',t:'range',min:10,max:200,l:'Night flash brightness',u:'',adv:1}]},
+ {id:'cam',t:'Camera',f:[
+  {k:'fsize',t:'size',l:'Resolution',h:'Higher resolution needs more Wi-Fi and storage. VGA is the sweet spot.'},
+  {k:'quality',t:'range',min:8,max:40,l:'JPEG quality',u:' (lower is sharper)'},
+  {k:'nmode',t:'sel',l:'Night mode',o:[[1,'Follow schedule'],[0,'Always day'],[2,'Always night']]},
+  {k:'nstart',t:'sel',l:'Night starts',o:O([...Array(24).keys()],x=>String(x).padStart(2,'0')+':00'),adv:1},
+  {k:'nend',t:'sel',l:'Night ends',o:O([...Array(24).keys()],x=>String(x).padStart(2,'0')+':00'),adv:1},
+  {k:'dyntune',t:'sw',l:'Automatic day/night gain',s:'Raises sensor gain at night, lowers it by day'},
+  {k:'lowlight',t:'sw',l:'Low-light boost',s:'Used when automatic gain is off',adv:1},
+  {k:'bright',t:'range',min:-2,max:2,l:'Brightness',u:''},{k:'contrast',t:'range',min:-2,max:2,l:'Contrast',u:''},{k:'sat',t:'range',min:-2,max:2,l:'Saturation',u:''},
+  {k:'wb',t:'sel',l:'White balance',o:[[0,'Auto'],[1,'Sunny'],[2,'Cloudy'],[3,'Office'],[4,'Home']]},
+  {k:'vflip',t:'sw',l:'Flip vertically'},{k:'hmirror',t:'sw',l:'Mirror horizontally'},
+  {k:'aec',t:'sw',l:'Automatic exposure',adv:1},{k:'aecval',t:'range',min:0,max:1200,l:'Manual exposure',u:'',adv:1},
+  {k:'agc',t:'sw',l:'Automatic gain',adv:1},{k:'agcgain',t:'range',min:0,max:30,l:'Manual gain',u:'',adv:1},{k:'aelevel',t:'range',min:-2,max:2,l:'Exposure bias',u:'',adv:1}]},
+ {id:'alr',t:'Alerts',f:[
+  {k:'tg',t:'sw',l:'Telegram alerts',s:'Sends a photo when motion is detected'},
+  {k:'tgtoken',t:'secret',l:'Bot token',ph:'123456:ABC...'},{k:'tgchat',t:'text',l:'Chat ID',ph:'987654321'},
+  {k:'tgcool',t:'sel',l:'Minimum time between alerts',o:O([15,30,45,60,120,300,600],x=>x+' seconds')},
+  {k:'tgsys',t:'sw',l:'System messages',s:'Boot, brownout, SD and Wi-Fi problems'},{k:'tgcmd',t:'sw',l:'Telegram commands',s:'/snap /status /arm /disarm /flash',adv:1},
+  {t:'btn',l:'Send test alert',fn:()=>post('/api/tgtest').then(()=>toast('Test queued')).catch(()=>toast('Test failed'))},
+  {k:'whurl',t:'text',l:'Webhook URL (http only)',ph:'http://192.168.1.10:8123/api/webhook/cam',adv:1},
+  {k:'mq',t:'sw',l:'MQTT / Home Assistant',s:'Auto-discovery of motion and arm switch',adv:1,need:'mqtt'},
+  {k:'mqhost',t:'text',l:'MQTT broker',adv:1},{k:'mqport',t:'range',min:1,max:65535,l:'MQTT port',u:'',adv:1},{k:'mquser',t:'text',l:'MQTT user',adv:1},{k:'mqpass',t:'secret',l:'MQTT password',adv:1},{k:'mqtopic',t:'text',l:'MQTT topic',adv:1}]},
+ {id:'acc',t:'Access',f:[{t:'acct'},{k:'authon',t:'sw',l:'Require sign-in',s:'Turning this off exposes the camera to everyone on your network',adv:1}]}];
+let subTab='rec',advOn=false;
+async function renderSettings(){const el=$('#v-set');try{const j=await api('/api/config');C=j.v;CFGX=j}catch(e){return}
+  el.innerHTML='';el.classList.toggle('showadv',advOn);
+  el.append(h('div',{class:'row',style:'margin:0 0 12px'},h('div',{class:'tabs',style:'flex:1;margin:0'},SCHEMA.map(s=>h('button',{class:s.id===subTab?'on':'',text:s.t,onclick:()=>{subTab=s.id;renderSettings()}}))),
+    h('label',{class:'chip'},h('input',{type:'checkbox',checked:advOn?'':false,onchange:e=>{advOn=e.target.checked;el.classList.toggle('showadv',advOn)}}),' Advanced')));
+  const card=h('div',{class:'card'});SCHEMA.find(s=>s.id===subTab).f.forEach(f=>{if(f.need==='mqtt'&&!CFGX.mqtt&&f.k==='mq')f={...f,s:'Needs the PubSubClient library (not installed in this build)'};const n=field(f);n&&card.append(n)});el.append(card)}
+function field(f){let n;const wrap=x=>{if(f.adv)x.classList.add('adv');return x};
+  if(f.t==='sw'){n=swRow(f.l,f.s,()=>!!C[f.k],v=>save(f.k,v?1:0))}
+  else if(f.t==='sel'){const s=h('select',{onchange:e=>save(f.k,e.target.value)},f.o.map(([v,l])=>h('option',{value:v,text:l})));s.value=C[f.k];n=h('div',{class:'fld'},h('label',{text:f.l}),s,f.h?h('div',{class:'hint',text:f.h}):'')}
+  else if(f.t==='size'){const s=h('select',{onchange:e=>save(f.k,e.target.value)},CFGX.sizes.map(o=>h('option',{value:o.v,text:o.l})));s.value=C[f.k];n=h('div',{class:'fld'},h('label',{text:f.l}),s,f.h?h('div',{class:'hint',text:f.h}):'')}
+  else if(f.t==='range'){const o=h('b',{text:C[f.k]+(f.u||'')});const r=h('input',{type:'range',min:f.min,max:f.max,value:C[f.k],oninput:e=>o.textContent=e.target.value+(f.u||''),onchange:e=>save(f.k,e.target.value)});n=h('div',{class:'fld'},h('label',{},f.l,o),r,f.h?h('div',{class:'hint',text:f.h}):'')}
+  else if(f.t==='text'||f.t==='secret'){const set=f.t==='secret'&&CFGX.set[f.k];const i=h('input',{type:f.t==='secret'?'password':'text',placeholder:set?'Saved. Type to replace, "-" to clear':(f.ph||''),autocomplete:'off',value:f.t==='secret'?'':(C[f.k]||''),onchange:e=>{save(f.k,e.target.value);if(f.t==='secret')e.target.value=''}});n=h('div',{class:'fld'},h('label',{text:f.l}),i)}
+  else if(f.t==='btn')n=h('div',{class:'row'},h('button',{text:f.l,onclick:f.fn}));
+  else if(f.t==='zone')n=h('div',{class:'row'},h('button',{text:'Edit motion zones',onclick:openZones}),h('span',{class:'hint',text:'Ignore areas such as trees, streets or a TV.'}));
+  else if(f.t==='acct')n=acctForm();
+  return n&&wrap(n)}
+async function save(k,v){try{await post('/api/config',{[k]:v});C[k]=isNaN(v)?v:+v;toast('Saved')}catch(e){toast('Could not save')}}
+function acctForm(){const w=h('div',{});const mk=(role,title,hint)=>{const u=h('input',{type:'text',placeholder:'Username',value:role==='admin'?(CFGX.admin||''):''}),p=h('input',{type:'password',placeholder:'New password (min 6)',autocomplete:'new-password'}),c=role==='admin'?h('input',{type:'password',placeholder:'Current password',autocomplete:'current-password'}):'';
+  return h('div',{class:'fld'},h('label',{text:title}),c,u,p,h('div',{class:'hint',text:hint}),h('div',{class:'row'},h('button',{class:'pri sm',text:'Save '+role+' login',onclick:async()=>{try{await post('/api/account',{role,user:u.value,pass:p.value,cur:c?c.value:''});toast('Saved');if(role==='admin'){S.role=0;gate('login')}}catch(e){toast('Check the fields (min 6 characters)')}}}),role==='viewer'?h('button',{class:'sm dng',text:'Remove viewer',onclick:()=>post('/api/account',{role:'viewer',remove:1}).then(()=>toast('Removed'))}):''))};
+  api('/api/session').then(s=>{const i=w.querySelector('input[type=text]');if(i&&!i.value)i.value=s.user;});
+  w.append(mk('admin','Administrator','Full control. Changing this signs everyone else out.'),mk('viewer','Viewer (optional)','Can watch live view, play clips and download. Cannot change anything.'));return w}
+
+/* zones */
+let Z=[];function hexToZ(x){const z=[];for(let i=0;i<192;i++){const c=x[i>>2]||'F',v=parseInt(c,16);z.push((v>>(3-(i&3)))&1)}return z}
+function zToHex(z){let s='';for(let n=0;n<48;n++){let v=0;for(let b=0;b<4;b++)v=v<<1|z[n*4+b];s+=v.toString(16).toUpperCase()}return s}
+function openZones(){Z=hexToZ(C.mzones||'F'.repeat(48));$('#z-img').src='/capture?t='+Date.now();const g=$('#z-g');g.innerHTML='';let paint=null;
+  Z.forEach((v,i)=>{const c=h('i',{class:v?'on':'','data-i':i});g.append(c)});
+  const setc=(i,v)=>{Z[i]=v;g.children[i].className=v?'on':''};
+  g.onpointerdown=e=>{const i=+e.target.dataset.i;if(isNaN(i))return;paint=Z[i]?0:1;setc(i,paint);g.setPointerCapture(e.pointerId)};
+  g.onpointermove=e=>{if(paint===null)return;const t=document.elementFromPoint(e.clientX,e.clientY);if(t&&t.dataset.i!==undefined)setc(+t.dataset.i,paint)};g.onpointerup=()=>paint=null;
+  $('#z-all').onclick=()=>Z.forEach((_,i)=>setc(i,1));$('#z-none').onclick=()=>Z.forEach((_,i)=>setc(i,0));
+  $('#z-save').onclick=async()=>{await save('mzones',zToHex(Z));$('#m-zone').classList.remove('on')};$('#m-zone').classList.add('on')}
+$('#z-x').onclick=()=>$('#m-zone').classList.remove('on');
+
+/* ---------- NETWORK ---------- */
+async function renderNet(){const el=$('#v-net');await poll();try{const j=await api('/api/config');C=j.v;CFGX=j}catch(e){return}el.innerHTML='';
+  const d=ST;el.append(h('div',{class:'card'},h('h2',{text:'Connection'}),h('div',{class:'stats'},sst('Network',d.ssid||'not connected'),sst('Address',d.ip||'-'),sst('Signal',d.rssi?d.rssi+' dBm':'-'),sst('Hostname','esp32cam.local')),
+    d.ap?h('div',{class:'hint',text:'Setup hotspot "'+d.apSsid+'" is on. Its password is printed on the serial console at boot (cctv-XXXXXX from the device MAC). It switches off a minute after Wi-Fi connects.'}):'',h('div',{class:'hint',id:'wmsg',text:d.wmsg||''})));
+  const nets=h('div',{class:'list',id:'nets'}),ssid=h('input',{type:'text',placeholder:'Network name'}),pass=h('input',{type:'password',placeholder:'Password',autocomplete:'off'});
+  el.append(h('div',{class:'card',style:'margin-top:14px'},h('h2',{text:'Join a Wi-Fi network'}),h('div',{class:'row',style:'margin:0 0 8px'},h('button',{text:'Scan 2.4 GHz',onclick:()=>scan(nets,ssid,pass)})),nets,h('div',{class:'fld',style:'margin-top:10px'},ssid),h('div',{class:'fld'},pass),
+    h('button',{class:'pri',text:'Connect and save',onclick:async()=>{if(!ssid.value)return toast('Enter a network name');await post('/api/wifi/connect',{ssid:ssid.value,pass:pass.value});toast('Connecting... the camera may change address');setTimeout(renderNet,6000)}}),h('div',{class:'hint',text:'The camera remembers up to 3 networks and rotates between them if one goes away.'})));
+  const st=[{k:'static',t:'sw',l:'Fixed IP address',s:'Skip DHCP'},{k:'sip',t:'text',l:'IP address',ph:'192.168.1.60'},{k:'sgw',t:'text',l:'Gateway',ph:'192.168.1.1'},{k:'ssn',t:'text',l:'Subnet mask'},{k:'sdns',t:'text',l:'DNS server'},
+    {k:'txpow',t:'range',min:8,max:20,l:'Wi-Fi transmit power',u:' dBm',h:'Lower it if the board runs hot or reboots with brownouts.'},{k:'strfps',t:'range',min:1,max:15,l:'Live view frame limit',u:' fps'},
+    {k:'tzmin',t:'sel',l:'Time zone',o:[[-480,'UTC-8'],[-420,'UTC-7'],[-360,'UTC-6'],[-300,'UTC-5'],[-240,'UTC-4'],[0,'UTC'],[60,'UTC+1'],[120,'UTC+2'],[180,'UTC+3'],[240,'UTC+4'],[300,'UTC+5 (Pakistan)'],[330,'UTC+5:30'],[345,'UTC+5:45'],[360,'UTC+6'],[480,'UTC+8'],[540,'UTC+9'],[600,'UTC+10']]},{k:'ntp',t:'text',l:'Time server'}];
+  const c2=h('div',{class:'card',style:'margin-top:14px'},h('h2',{text:'Address, power and time'}));st.forEach(f=>c2.append(field(f)));el.append(c2);
+  const up=h('input',{type:'file',accept:'.bin'});el.append(h('div',{class:'card',style:'margin-top:14px'},h('h2',{text:'Firmware update'}),h('div',{class:'hint',text:'Version '+(CFGX.fw||'')+'. Choose the .bin exported from Arduino IDE (Sketch > Export Compiled Binary). The camera restarts when done.'}),up,h('div',{class:'row'},h('button',{class:'pri',text:'Upload and install',onclick:()=>ota(up)})),h('div',{class:'bar'},h('i',{id:'otab',style:'width:0;background:var(--amber)'}))))}
+const sst=(k,v)=>h('div',{class:'st'},h('div',{class:'k',text:k}),h('div',{class:'v',text:v}));
+async function scan(box,ssid,pass){box.innerHTML='<div class="hint">Scanning...</div>';await api('/api/wifi/scan?start=1');
+  for(let i=0;i<12;i++){await new Promise(r=>setTimeout(r,1000));const j=await api('/api/wifi/scan');if(j.state==='failed'){box.innerHTML='<div class="hint">Scan failed. Wait a few seconds and try again.</div>';return}if(j.state==='done'){box.innerHTML='';if(!j.nets.length)box.innerHTML='<div class="hint">No networks found. Try again.</div>';
+    j.nets.sort((a,b)=>b.rssi-a.rssi).forEach(n=>box.append(h('div',{class:'item',style:'cursor:pointer',onclick:()=>{ssid.value=n.ssid;pass.focus()}},h('div',{class:'nm',text:(n.lock?'Locked - ':'Open - ')+n.ssid}),h('span',{class:'hint',text:n.rssi+' dBm'}),j.saved.includes(n.ssid)?h('span',{class:'chip ok',text:'saved'}):'')));return}}
+  box.innerHTML='<div class="hint">Scan timed out.</div>'}
+function ota(inp){if(!inp.files[0])return toast('Choose a .bin file');if(!confirm('Install this firmware? Recording pauses and the camera restarts.'))return;
+  const x=new XMLHttpRequest(),fd=new FormData();fd.append('update',inp.files[0]);x.open('POST','/api/ota');x.setRequestHeader('X-CSRF',S.csrf);
+  x.upload.onprogress=e=>{$('#otab').style.width=(e.loaded/e.total*100)+'%'};x.onload=()=>{x.status===200?toast('Installed. Restarting...'):toast('Update failed')};x.onerror=()=>toast('Upload failed');x.send(fd)}
+
+/* ---------- SYSTEM ---------- */
+async function renderSys(){const el=$('#v-sys');el.innerHTML='';let dg={};try{dg=await api('/api/diag')}catch(e){return}
+  const cv=h('canvas',{width:520,height:70,style:'width:100%;height:70px'});
+  el.append(h('div',{class:'card'},h('h2',{text:'Health'}),h('div',{class:'stats'},sst('Uptime',fmtUp(ST.up||0)),sst('Last restart',ST.rr||'-'),sst('Chip temp',dg.temp+' C'),sst('Free heap',Math.round(dg.heap/1024)+' KB (low '+Math.round(dg.minHeap/1024)+')'),sst('Free PSRAM',Math.round(dg.psram/1024)+' KB'),sst('SD write',dg.sdms+' ms avg / '+dg.sdmax+' max'),sst('SD errors',dg.sderr),sst('Frames dropped',dg.drop+' (+'+dg.oversize+' oversize)'),sst('Recorder queue',dg.qdepth),sst('Camera resets',dg.camrec),sst('Firmware',dg.fw),sst('CPU',dg.cpu+' MHz')),
+    h('div',{class:'hint',style:'margin-top:10px',text:'Wi-Fi signal history (30 s steps)'}),cv,h('div',{class:'hint',text:'Restart history: '+(dg.resets||'none').replace(/;/g,' | ')})));
+  const g=cv.getContext('2d'),r=dg.rssi.filter(x=>x!==0);g.strokeStyle=getComputedStyle(document.body).getPropertyValue('--amber');g.lineWidth=2;g.beginPath();r.forEach((v,i)=>{const x=i/(Math.max(1,r.length-1))*520,y=70-Math.max(0,Math.min(1,(v+95)/60))*66-2;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();
+  const log=h('pre',{class:'log',id:'log'});let lv='ALL',q='';let lines=[];
+  const draw=()=>{log.innerHTML='';lines.filter(l=>(lv==='ALL'||l.includes('['+lv+']'))&&l.toLowerCase().includes(q)).forEach(l=>log.append(h('div',{class:l.includes('[ERR]')?'lE':l.includes('[WARN]')?'lW':'',text:l})));log.scrollTop=log.scrollHeight};
+  const load=async()=>{lines=await api('/api/log');draw()};
+  el.append(h('div',{class:'card',style:'margin-top:14px'},h('h2',{text:'Activity log'}),h('div',{class:'row',style:'margin:0 0 8px'},h('select',{style:'width:auto',onchange:e=>{lv=e.target.value;draw()}},['ALL','INFO','WARN','ERR'].map(x=>h('option',{text:x}))),h('input',{type:'text',placeholder:'Search',style:'flex:1;min-width:120px',oninput:e=>{q=e.target.value.toLowerCase();draw()}}),h('button',{class:'sm',text:'Refresh',onclick:load}),h('a',{href:'/api/logfile'},h('button',{class:'sm',text:'Download full log'})),h('button',{class:'sm dng',text:'Clear',onclick:()=>post('/api/logclear').then(load)})),log));load();
+  const rs=h('input',{type:'file',accept:'.json'});
+  el.append(h('div',{class:'card',style:'margin-top:14px'},h('h2',{text:'Maintenance'}),h('div',{class:'row',style:'margin:0'},
+    h('button',{text:'Sync clock from this device',onclick:()=>post('/api/settime',{epoch:Math.floor(Date.now()/1000)}).then(()=>toast('Clock synced'))}),
+    h('a',{href:'/api/backup'},h('button',{text:'Export settings'})),
+    h('button',{text:'Download diagnostics',onclick:async()=>{const b=new Blob([JSON.stringify({diag:dg,status:ST,log:lines},null,1)],{type:'application/json'});const a=h('a',{href:URL.createObjectURL(b),download:'diagnostics.json'});a.click()}}),
+    h('button',{class:'dng',text:'Restart camera',onclick:()=>confirm('Restart now? Open recordings are closed safely.')&&post('/api/reboot').then(()=>toast('Restarting...'))})),
+    h('div',{class:'fld',style:'margin-top:14px'},h('label',{text:'Import settings'}),rs,h('div',{class:'row'},h('button',{class:'sm',text:'Import',onclick:async()=>{if(!rs.files[0])return;try{const o=JSON.parse(await rs.files[0].text());await post('/api/config',Object.fromEntries(Object.entries(o).map(([k,v])=>[k,typeof v==='boolean'?(v?1:0):v])));toast('Imported')}catch(e){toast('Invalid file')}}})),h('div',{class:'hint',text:'Passwords, tokens and Wi-Fi credentials are never exported.'})),
+    h('div',{class:'fld',style:'margin-top:14px'},h('label',{text:'Factory reset'}),h('div',{class:'hint',text:'Erases all settings, Wi-Fi and accounts. Recordings on the SD card stay.'}),h('div',{class:'row'},h('button',{class:'sm dng',text:'Factory reset',onclick:()=>{if(prompt('Type RESET to erase every setting')==='RESET')post('/api/factory',{confirm:'RESET'}).then(()=>toast('Resetting...'))}})))))}
+
+/* ---------- boot ---------- */
+async function boot(){try{const s=await api('/api/session');S.role=s.role;S.csrf=s.csrf;S.must=s.must;C.camname=s.name;CFGX.admin=s.user;
+  if(!s.auth||s.role){if(s.must){gate('pw');return}$('#gate').classList.remove('on');document.title=s.name;buildNav();buildLive();$('#b-out').style.display=s.auth?'':'none';go('live')}else gate('login')}catch(e){e!==0&&gate('login')}}
+$('#b-out').onclick=async()=>{await post('/api/logout');S.role=0;location.reload()};
+boot();
+</script></body></html>
